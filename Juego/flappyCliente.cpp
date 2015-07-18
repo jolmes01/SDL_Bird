@@ -1,5 +1,6 @@
 #include "SDL.h"
 #include <iostream>
+#include "data.h"
 #include "SocketDatagrama.h"
 
 // se encarga de copiar 3 veces el fondo y presentarlo consecutivamente
@@ -25,8 +26,7 @@ renderFondo(SDL_Renderer * render, SDL_Texture * textura)
 	SDL_RenderCopy(render, textura, &rectangulo_origen, &rectangulo_destino);
 }
 
-int 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	int		port;
 	char	serverIp  [16];
@@ -35,7 +35,8 @@ main(int argc, char **argv)
 		exit(-1);
 	}
 
-	int	   cordenadas [3];
+	birdPackage infoToSend;
+	bzero(&infoToSend,sizeof(birdPackage));
 	SocketDatagrama	socket;
 
 	strcpy(serverIp, argv[1]);
@@ -96,15 +97,16 @@ main(int argc, char **argv)
 			if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
 				rectangulo_destino.y -= 100;
 				angulo = 300;
+				infoToSend.opcode = 1;
 			} else if (event.type == SDL_QUIT) {
 				done = 0;
 			}
 		}
 		//enviar Paquete con las coordenadas
-		cordenadas[0] = rectangulo_destino.x;
-		cordenadas[1] = rectangulo_destino.y;
-		cordenadas[2] = angulo;
-		PaqueteDatagrama paq((char *)cordenadas, 3 * sizeof(int), serverIp, port);
+		infoToSend.posicionJUMP_X = rectangulo_destino.x;
+		infoToSend.posicionJUMP_Y = rectangulo_destino.y;
+		infoToSend.angulo = angulo;
+		PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
 		socket.envia(paq);
 		//se pinta actualiza el render
 		SDL_RenderClear(render);

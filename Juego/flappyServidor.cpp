@@ -3,6 +3,7 @@
 #include "SDL.h"
 #include <iostream> //I included it since I used cout
 #include "SocketDatagrama.h"
+#include "data.h"
 
 void renderFondo(SDL_Renderer * r,SDL_Texture *s)
 {
@@ -27,6 +28,7 @@ void renderFondo(SDL_Renderer * r,SDL_Texture *s)
 
 int main(int argc, char ** argv)
 {
+    struct birdPackage infoReceived;
     int port;
     char serverIp[16];
     if(argc != 3)
@@ -36,7 +38,6 @@ int main(int argc, char ** argv)
     }
     strcpy(serverIp, argv[1]);
     port = atoi(argv[2]);
-    int *cordenadas;
     SocketDatagrama socket(port);
     
     
@@ -91,12 +92,13 @@ const int FPS = 24; //Cuantos frames por segundo queremos, 60 es el que utilizan
   Uint32 frameStart, frameTime;
 while(done){
     frameStart = SDL_GetTicks();
-    PaqueteDatagrama paq(sizeof(int)*3);
-    socket.recibe(paq);
-    cordenadas = (int *)paq.obtieneDatos();
-    d_rect.x = cordenadas[0] ;
-    d_rect.y = cordenadas[1];
-    angulo = cordenadas[2];
+    bzero(&infoReceived,sizeof(birdPackage));
+    PaqueteDatagrama receive(sizeof(birdPackage));
+    socket.recibe(receive);
+    memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
+    d_rect.x = infoReceived.posicionJUMP_X;
+    d_rect.y = infoReceived.posicionJUMP_Y;
+    angulo = infoReceived.angulo;
 
     //esperar paquete con las coordenadas nuevas
     while ( SDL_PollEvent(&event) ) 
