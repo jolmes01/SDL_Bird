@@ -24,7 +24,7 @@ struct birdPackage{
 	int jugadoresTotales; //Número de jugadores dentro de la partida
 	int posicionJUMP_X[3]; //Número representativo del salto del jugador en el eje X
 	int posicionJUMP_Y[3]; //Número representativo del salto del jugador en el eje Y
-	double angulo;
+	double angulo[3]; //Número representativo del angulo del jugador en el eje Y
 	/* INSERTAR MÄS DATOS QUE REQUIERAN SER MANDADOS MEDIANTE birdPackage */
 	/**********************************************************************/
 };

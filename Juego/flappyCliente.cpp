@@ -7,6 +7,7 @@
 int posX, posY, nJugador = 0;
 SDL_Rect rectangulo_origen[3]; //Variables para los pajaros en el atlas.bmp
 SDL_Rect rectangulo_destino[3]; //Variables para la posicion en pantalla de los pajaros
+double angulos[3];
 
 /* Global functions */
 void renderFondo(SDL_Renderer *, SDL_Texture *);
@@ -53,10 +54,6 @@ int main(int argc, char **argv)
 		nJugador = infoReceived.jugadorNum;
 		infoToSend.opcode = JUMP;
 		std::cout << "Partida iniciada, jugador: " << nJugador << std::endl;
-		for (int i = 0; i < 3; ++i)
-		{
-			cout << "X: " << infoReceived.posicionJUMP_X[i] << "Y: " << infoReceived.posicionJUMP_Y[i] << "\n";
-		}
 	}
 
 	SDL_Init(SDL_INIT_VIDEO);
@@ -110,9 +107,10 @@ int main(int argc, char **argv)
 			}
 		}
 		//enviar Paquete con las coordenadas
+		infoToSend.jugadorNum = nJugador;
 		infoToSend.posicionJUMP_X[nJugador] = rectangulo_destino[nJugador].x;
 		infoToSend.posicionJUMP_Y[nJugador] = rectangulo_destino[nJugador].y;
-		infoToSend.angulo = angulo;
+		infoToSend.angulo[nJugador] = angulo;
 		PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
 		socket.envia(paq);
 		//Recibir paquete con las coordenadas actualizadas
@@ -127,13 +125,15 @@ int main(int argc, char **argv)
 		//Actualiza la posicion de los pajaros
 		for (int i = 0; i < 3; ++i)
 		{
-			rectangulo_destino[i].x = infoReceived.posicionJUMP_X[nJugador];
-			rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[nJugador];
+			rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
+			rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
+			angulos[i] = infoReceived.angulo[i];
+
 		}
 		for (i = 0; i < infoReceived.jugadoresTotales; ++i)
 		{
 			//funciona como copy pero rota la imagen con el angulo
-			SDL_RenderCopyEx(render, textura, &rectangulo_origen[i], &rectangulo_destino[i], angulo, NULL, SDL_FLIP_NONE);
+			SDL_RenderCopyEx(render, textura, &rectangulo_origen[i], &rectangulo_destino[i], infoReceived.angulo[i], NULL, SDL_FLIP_NONE);
 		}
 		SDL_RenderPresent(render);
 

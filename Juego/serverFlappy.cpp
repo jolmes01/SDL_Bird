@@ -17,6 +17,7 @@ int main(int argc, char *argv[]){
 	struct birdPackage infoReceived;
 	int posicionesX[3] = {0,0,0};
 	int posicionesY[3] = {0,0,0};
+	double angulo[3] = {330,330,330};
 	int nJugadores = 0;
 	int *nPaquetes;
 	if(argc != 2)
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]){
 				infoReceived.jugadorNum = nJugadores;
 				infoReceived.posicionJUMP_X[nJugadores] = posicionesX[nJugadores];
 				infoReceived.posicionJUMP_Y[nJugadores] = posicionesY[nJugadores];
+				infoReceived.angulo[nJugadores] = angulo[nJugadores];
 				cout << "X: " << infoReceived.posicionJUMP_X[nJugadores] << "Y: " << infoReceived.posicionJUMP_Y[nJugadores] << "\n";
 				printf("NUEVO JUGADOR %d\n",nJugadores);
 				nJugadores++;
@@ -60,6 +62,8 @@ int main(int argc, char *argv[]){
 			{
 				posicionesX[infoReceived.jugadorNum] = infoReceived.posicionJUMP_X[infoReceived.jugadorNum];
 				posicionesY[infoReceived.jugadorNum] = infoReceived.posicionJUMP_Y[infoReceived.jugadorNum];
+				angulo[infoReceived.jugadorNum] = infoReceived.angulo[infoReceived.jugadorNum];
+				//cout << "X: " << posicionesX[infoReceived.jugadorNum] << "Y: " << posicionesY[infoReceived.jugadorNum] << "\n";
 			}
 		}
 		int i = 0;
@@ -67,7 +71,10 @@ int main(int argc, char *argv[]){
 		{
 			infoReceived.posicionJUMP_X[i] = posicionesX[i];
 			infoReceived.posicionJUMP_Y[i] = posicionesY[i];
+			infoReceived.angulo[i] = angulo[i];
+			cout << "X: " << posicionesX[i] << "Y: " << posicionesY[i] << "\n";
 		}
+		cout << "\n";
 		infoReceived.jugadoresTotales = nJugadores; //Se informa de igual forma de los jugadores totales existentes
 		//Se empaqueta la estructura y se envía a la IP que solicito el cambio
 		PaqueteDatagrama envio((char *)&infoReceived, sizeof(birdPackage),(char*)"",0);
