@@ -7,7 +7,7 @@
 int posX, posY, nJugador = 0;
 SDL_Rect rectangulo_origen[3]; //Variables para los pajaros en el atlas.bmp
 SDL_Rect rectangulo_destino[3]; //Variables para la posicion en pantalla de los pajaros
-double angulos[3];
+double angulos[3]; //Variables de los angulos para cada jugador
 
 /* Global functions */
 void renderFondo(SDL_Renderer *, SDL_Texture *);
@@ -103,6 +103,7 @@ int main(int argc, char **argv)
 				angulo = 300;
 				infoToSend.opcode = 1;
 			} else if (event.type == SDL_QUIT) {
+				infoToSend.opcode = CLOSE;
 				done = 0;
 			}
 		}

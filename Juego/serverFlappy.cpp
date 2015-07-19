@@ -51,6 +51,11 @@ int main(int argc, char *argv[]){
 			}
 			else infoReceived.opcode = DENY;
 		}
+		if(infoReceived.opcode == CLOSE)
+		{
+			printf("JUGADOR FUERA DE PARTIDA...\n");
+			nJugadores--;
+		}
 		if(infoReceived.opcode == DEAD) //Se informa al servidor de la muerte de un jugador
 		{
 			printf("JUGADOR MUERTO...\n");
@@ -72,9 +77,7 @@ int main(int argc, char *argv[]){
 			infoReceived.posicionJUMP_X[i] = posicionesX[i];
 			infoReceived.posicionJUMP_Y[i] = posicionesY[i];
 			infoReceived.angulo[i] = angulo[i];
-			cout << "X: " << posicionesX[i] << "Y: " << posicionesY[i] << "\n";
 		}
-		cout << "\n";
 		infoReceived.jugadoresTotales = nJugadores; //Se informa de igual forma de los jugadores totales existentes
 		//Se empaqueta la estructura y se envía a la IP que solicito el cambio
 		PaqueteDatagrama envio((char *)&infoReceived, sizeof(birdPackage),(char*)"",0);
