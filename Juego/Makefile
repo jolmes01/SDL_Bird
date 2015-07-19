@@ -1,6 +1,6 @@
 SDLFLAGS := $(shell sdl2-config --libs --cflags)
 
-all:flappyCliente flappyServidor flappy server
+all:flappyCliente flappy server
 
 server:SocketDatagrama.o PaqueteDatagrama.o
 	g++ serverFlappy.cpp SocketDatagrama.o PaqueteDatagrama.o -o server

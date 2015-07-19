@@ -24,15 +24,15 @@ int main(int argc, char *argv[]){
 		cout << "Forma de uso: " << argv[0] << " puerto\n";
 		exit(0);
 	}
+
 	SocketDatagrama socketlocal(atoi(argv[1]));
-	socketlocal.setTiempoEspera(1);
+
 	while(1)
 	{
 
-		PaqueteDatagrama receive(sizeof(birdPackage));
 		bzero(&infoReceived,sizeof(birdPackage));
+		PaqueteDatagrama receive(sizeof(birdPackage));
 		socketlocal.recibe(receive);
-		cout << "OPCODE recibido: " << infoReceived.opcode << endl;
 		memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
 		/* Se revisan los códigos de operación para la interacción del jugador*/
 		if(infoReceived.opcode == NEW) //Se quiere integrar un nuevo jugador
@@ -41,8 +41,9 @@ int main(int argc, char *argv[]){
 			{
 				infoReceived.opcode = ALLOW;
 				infoReceived.jugadorNum = nJugadores;
-				posicionesX[nJugadores] = infoReceived.posicionJUMP_X[nJugadores];
-				posicionesY[nJugadores] = infoReceived.posicionJUMP_Y[nJugadores];
+				infoReceived.posicionJUMP_X[nJugadores] = posicionesX[nJugadores];
+				infoReceived.posicionJUMP_Y[nJugadores] = posicionesY[nJugadores];
+				cout << "X: " << infoReceived.posicionJUMP_X[nJugadores] << "Y: " << infoReceived.posicionJUMP_Y[nJugadores] << "\n";
 				printf("NUEVO JUGADOR %d\n",nJugadores);
 				nJugadores++;
 			}
@@ -55,7 +56,6 @@ int main(int argc, char *argv[]){
 		}
 		if(infoReceived.opcode != NEW && infoReceived.opcode != DEAD) //El código puede ser un salto que hizo el jugador
 		{
-			printf("opcode: %d\tJuagador:%d\n",infoReceived.opcode,infoReceived.jugadorNum);
 			if(infoReceived.opcode == JUMP) //Se actualizan las posiciones en el servidor del jugador que se movio
 			{
 				posicionesX[infoReceived.jugadorNum] = infoReceived.posicionJUMP_X[infoReceived.jugadorNum];
@@ -74,7 +74,6 @@ int main(int argc, char *argv[]){
 		envio.inicializaIp(receive.obtieneDireccion());
 		envio.inicializaPuerto(receive.obtienePuerto());
 
-		cout << "Enviando paquetes a cliente: " << envio.obtieneDireccion() << "\n";
 		envio.inicializaDatos((char*)&infoReceived);
 		socketlocal.envia(envio);
 	}

@@ -15,38 +15,49 @@ void initPajarosOrigen(SDL_Renderer *, SDL_Texture *);
 int main(int argc, char **argv)
 {
 	struct birdPackage infoToSend, infoReceived;
-	int		port;
-	char	serverIp  [16];
+	int	port;
+	char serverIp  [16];
 	if (argc != 3) {
         std::cout << "USO flappy <serverIp> <port>" << std::endl;
 		exit(-1);
 	}
 
+	strcpy(serverIp, argv[1]);
+	port = atoi(argv[2]);
+
 	SocketDatagrama	socket;
-	socket.setTiempoEspera(1);
+
+	std::cout << "Enviando al servidor: " << serverIp << " : " << port << " datos iniciados" << std::endl;
 
 	bzero(&infoToSend,sizeof(birdPackage));
 	bzero(&infoReceived,sizeof(birdPackage));
 
 	/* CONEXION POR PRIMERA VEZ */
 	infoToSend.opcode = NEW;
+
+	std::cout << "OPCODE: " << infoToSend.opcode << std::endl;
+
 	PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
 	socket.envia(paq);
-	std::cout << "Enviando al servidor datos iniciados" << std::endl;
+
     PaqueteDatagrama receive(sizeof(birdPackage));
     socket.recibe(receive);
+
     memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
+
 	if(infoReceived.opcode == DENY) //Se rechaza al jugador, por lo que se tiene que salir
 	{
 		std::cout << "Partida llena intente más tarde..." << std::endl;
 		exit(-1);
 	}else{
 		nJugador = infoReceived.jugadorNum;
+		infoToSend.opcode = JUMP;
 		std::cout << "Partida iniciada, jugador: " << nJugador << std::endl;
+		for (int i = 0; i < 3; ++i)
+		{
+			cout << "X: " << infoReceived.posicionJUMP_X[i] << "Y: " << infoReceived.posicionJUMP_Y[i] << "\n";
+		}
 	}
-
-	strcpy(serverIp, argv[1]);
-	port = atoi(argv[2]);
 
 	SDL_Init(SDL_INIT_VIDEO);
 	SDL_Window     *ventana = SDL_CreateWindow("Hi", 200, 200, 864, 510, SDL_WINDOW_SHOWN);
@@ -116,8 +127,8 @@ int main(int argc, char **argv)
 		//Actualiza la posicion de los pajaros
 		for (int i = 0; i < 3; ++i)
 		{
-			rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
-			rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
+			rectangulo_destino[i].x = infoReceived.posicionJUMP_X[nJugador];
+			rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[nJugador];
 		}
 		for (i = 0; i < infoReceived.jugadoresTotales; ++i)
 		{
