@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
 	for(int j = 0 ; j<TUBE_LIST_SIZE;j++){
 		int altura = rand()%80 + 100;
 		tuberiasY[j] = altura;
-		tuberiasX[j] = (int) 864/4 * (j+1);
+		tuberiasX[j] = (int) 864/4 * (j+3);
 	}
 	
 	SocketDatagrama socketlocal(atoi(argv[1]));
