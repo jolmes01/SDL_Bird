@@ -1,3 +1,9 @@
 # Compiled source #
 ###################
 *.o
+
+# Executable files #
+####################
+flappy
+flappyCliente
+server
