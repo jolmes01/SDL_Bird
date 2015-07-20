@@ -1,8 +1,8 @@
 // 	Game.h
 /*
-	Estructura de la clase Game. 
+	Estructura de la clase Game.
 	Clase que nos permite crear y manejar los gráficos de nuestro programa.
-*/
+ */
 
 #ifndef __Game__
 #define __Game__
@@ -28,6 +28,8 @@ public:
 	void renderFondo();
 	void initPajarosOrigen();
 	void iniciarConexion();
+	void renderTuberias(struct birdPackage *);
+	bool colision(SDL_Rect *,SDL_Rect *);
 private:
 	bool m_bRunning;
 	SDL_Window* ventana;
