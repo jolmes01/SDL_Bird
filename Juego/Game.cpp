@@ -40,15 +40,15 @@ void Game::init(const char* titulo, int xpos, int ypos, int ancho, int alto){
 		m_bRunning = 0;
 	}
 	ventana = SDL_CreateWindow(titulo, xpos, ypos, ancho, alto, SDL_WINDOW_SHOWN);
-	if (ventana == nullptr){
+	_render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
+	/*if (ventana == nullptr){
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
 	}
-	_render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
 	if (_render == nullptr){
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
-	}
+	}*/
 	//se carga la imagen que contiene todos los graficos
 	bmp = SDL_LoadBMP("atlas.bmp");
 	//bmp = SDL_LoadBMP("/Volumes/Macintosh HD/Users/emyrkr/Desktop/atlas.bmp");
@@ -79,6 +79,8 @@ void Game::handleEvents(){
 			infoToSend.opcode = 1;
 		} else if (event.type == SDL_QUIT) {
 			infoToSend.opcode = CLOSE;
+			infoToSend.posicionJUMP_X[nJugador] = -200;
+			infoToSend.posicionJUMP_Y[nJugador] = -200;
 			m_bRunning = false;
 		}
 	}
@@ -95,8 +97,11 @@ void Game::update(){
 	}
 	//enviar Paquete con las coordenadas
 	infoToSend.jugadorNum = nJugador;
-	infoToSend.posicionJUMP_X[nJugador] = rectangulo_destino[nJugador].x;
-	infoToSend.posicionJUMP_Y[nJugador] = rectangulo_destino[nJugador].y;
+	if(infoToSend.opcode != CLOSE && infoToSend.opcode != DEAD)
+	{
+		infoToSend.posicionJUMP_X[nJugador] = rectangulo_destino[nJugador].x;
+		infoToSend.posicionJUMP_Y[nJugador] = rectangulo_destino[nJugador].y;
+	}
 	infoToSend.angulo[nJugador] = angulo;
 	PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
 	socket.envia(paq);
@@ -119,7 +124,7 @@ void Game::update(){
 }
 
 void Game::render(){
-	for (int i = 0; i < infoReceived.jugadoresTotales; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		//funciona como copy pero rota la imagen con el angulo
 		SDL_RenderCopyEx(_render, textura, &rectangulo_origen[i], &rectangulo_destino[i], infoReceived.angulo[i], NULL, SDL_FLIP_NONE);
@@ -208,6 +213,8 @@ void Game::renderTuberias(struct birdPackage *p){
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
+			infoToSend.posicionJUMP_X[nJugador] = -200;
+			infoToSend.posicionJUMP_Y[nJugador] = -200;
 		}
 		pantalla.y = p->posicionTUBES_Y[i] + 200;
 		
@@ -215,6 +222,8 @@ void Game::renderTuberias(struct birdPackage *p){
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
+			infoToSend.posicionJUMP_X[nJugador] = -200;
+			infoToSend.posicionJUMP_Y[nJugador] = -200;
 		}
 	}
 	

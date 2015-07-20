@@ -15,8 +15,8 @@ using namespace std;
 int main(int argc, char *argv[]){
 	cout << "Servidor iniciado" << endl;
 	struct birdPackage infoReceived;
-	int posicionesX[3] = {0,0,0};
-	int posicionesY[3] = {0,0,0};
+	int posicionesX[3] = {-100,-100,-100};
+	int posicionesY[3] = {-100,-100,-100};
 	double angulo[3] = {330,330,330};
 	int tuberiasX[TUBE_LIST_SIZE];
 	int tuberiasY[TUBE_LIST_SIZE];
@@ -67,6 +67,8 @@ int main(int argc, char *argv[]){
 		if(infoReceived.opcode == DEAD) //Se informa al servidor de la muerte de un jugador
 		{
 			printf("JUGADOR MUERTO...\n");
+			posicionesX[infoReceived.jugadorNum] = -200;
+			posicionesY[infoReceived.jugadorNum] = -200;
 			nJugadores--;
 		}
 		if(infoReceived.opcode != NEW && infoReceived.opcode != DEAD) //El código puede ser un salto que hizo el jugador

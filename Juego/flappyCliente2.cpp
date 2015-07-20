@@ -3,7 +3,7 @@
 #include "SocketDatagrama.h"
 #include "PaqueteDatagrama.h"
 
-const int FPS = 30;
+const int FPS = 20;
 const float DELAY_TIME = 1000.0f / FPS;
 Game* g_game = 0;
 
