@@ -7,12 +7,12 @@
 #ifndef __Game__
 #define __Game__
 
+#include "SDL.h"
+#include <iostream>
+#include <cmath>
 #include "data.h"
 #include "SocketDatagrama.h"
 #include "PaqueteDatagrama.h"
-#include <iostream>
-#include "SDL.h"	
-#include <cmath>
 
 class Game
 {
