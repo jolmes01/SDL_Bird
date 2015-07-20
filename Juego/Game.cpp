@@ -206,14 +206,14 @@ void Game::renderTuberias(struct birdPackage *p){
 		pantalla.y = p->posicionTUBES_Y[i] -250 ;
 		SDL_RenderCopy(_render, textura, &tuberia, &pantalla);
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
-			cout <<"Dead\n";
+			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
 		}
 		pantalla.y = p->posicionTUBES_Y[i] + 200;
 		
 		SDL_RenderCopy(_render, textura, &tuberia2, &pantalla);
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
-			cout <<"Dead\n";
+			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
 		}
 	}
