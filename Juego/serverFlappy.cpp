@@ -66,7 +66,6 @@ int main(int argc, char *argv[]){
 			nJugadores = 0;
 			flaginit=0;
 		}*/
-		
 		if(infoReceived.opcode == NEW) //Se quiere integrar un nuevo jugador
 		{
 			if(nJugadores < 3) //Es permitido
@@ -97,11 +96,28 @@ int main(int argc, char *argv[]){
 		}
 		if(infoReceived.opcode == DEAD) //Se informa al servidor de la muerte de un jugador
 		{
-			printf("JUGADOR MUERTO...\n");
-			//posicionesX[infoReceived.jugadorNum] = 0;
-			//posicionesY[infoReceived.jugadorNum] = 0;
+			printf("JUGADOR MUERTO %d...\n",nJugadores);
+			
+			posicionesX[infoReceived.jugadorNum] = -200;
+			posicionesY[infoReceived.jugadorNum] = -200;
 			if(nJugadores>0)
 			nJugadores--;
+			if(nJugadores==0){
+				tubes = false;
+				for(int i = 0 ; i < 3 ; i++){
+					posicionesX[i] = -100;
+					posicionesY[i] = -100;
+					angulo[i] =330;
+				}
+				
+				
+				for(int j = 0 ; j<TUBE_LIST_SIZE;j++){
+					int altura = rand()%80 + 100;
+					tuberiasY[j] = altura;
+					tuberiasX[j] = (int) 864/4 * (j+3);
+				}
+				infoReceived.opcode = GAME_OVER;
+			}
 		}
 		if(infoReceived.opcode != NEW && infoReceived.opcode != DEAD) //El código puede ser un salto que hizo el jugador
 		{
@@ -121,7 +137,7 @@ int main(int argc, char *argv[]){
 			}
 			if(infoReceived.opcode == WAIT) //Se actualizan las posiciones en el servidor del jugador que se movio
 			{
-				if(nJugadores == 3) infoReceived.opcode = ALLOW;
+				if(nJugadores == 3)infoReceived.opcode = ALLOW;
 			}
 		}
 

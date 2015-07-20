@@ -29,6 +29,7 @@ public:
 	void initPajarosOrigen();
 	void iniciarConexion();
 	void renderTuberias(struct birdPackage *);
+	void renderGameOver();
 	bool colision(SDL_Rect *,SDL_Rect *);
 private:
 	bool m_bRunning;

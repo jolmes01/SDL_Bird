@@ -19,6 +19,7 @@
 #define CLOSE	6 //Jugador rechazado en la partida
 #define WAIT	7 //En espera de que el servidor le avise de la partida completa
 #define VIEW	8 //Queda viendo
+#define GAME_OVER 9 //Game OVer
 #define TUBE_LIST_SIZE 500 //CANTIDAD DE TUBERIAS
 /* Formato del mensaje que viaja con los datos del movimiento del jugador */
 struct birdPackage{

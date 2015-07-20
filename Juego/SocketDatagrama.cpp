@@ -59,7 +59,7 @@ void SocketDatagrama::setTiempoEspera(double seconds)
 {
 	struct timeval tiempoFuera;
 	tiempoFuera.tv_sec = 0;
-	tiempoFuera.tv_usec = 1000000 * seconds;
+	tiempoFuera.tv_usec = 500000 * seconds;
 	setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&tiempoFuera, sizeof(tiempoFuera));
 }
 

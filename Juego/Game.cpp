@@ -74,7 +74,7 @@ void Game::handleEvents(){
 	{
 		//salto
 		if (infoToSend.opcode!=DEAD && infoToSend.opcode!=VIEW && event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
-			rectangulo_destino[nJugador].y -= 100;
+			rectangulo_destino[nJugador].y -= 70;
 			angulo = 300;
 			infoToSend.opcode = 1;
 		} else if (event.type == SDL_QUIT) {
@@ -115,6 +115,7 @@ void Game::update(){
 	//se pinta actualiza el render
 	SDL_RenderClear(_render);
 	renderFondo();
+	if(infoReceived.opcode!=GAME_OVER){
 	renderTuberias(&infoReceived);
 	//int i = 0;
 	//Actualiza la posicion de los pajaros
@@ -122,6 +123,10 @@ void Game::update(){
 		rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
 		rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
 		angulos[i] = infoReceived.angulo[i];
+	}
+	}
+	else{
+		renderGameOver();
 	}
 	
 }
@@ -216,8 +221,8 @@ void Game::renderTuberias(struct birdPackage *p){
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
-			//infoToSend.posicionJUMP_X[nJugador] = -200;
-			//infoToSend.posicionJUMP_Y[nJugador] = -200;
+			infoToSend.posicionJUMP_X[nJugador] = -200;
+			infoToSend.posicionJUMP_Y[nJugador] = -200;
 		}
 		pantalla.y = p->posicionTUBES_Y[i] + 200;
 		
@@ -225,8 +230,8 @@ void Game::renderTuberias(struct birdPackage *p){
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
-			//infoToSend.posicionJUMP_X[nJugador] = -200;
-			//infoToSend.posicionJUMP_Y[nJugador] = -200;
+			infoToSend.posicionJUMP_X[nJugador] = -200;
+			infoToSend.posicionJUMP_Y[nJugador] = -200;
 		}
 	}
 	
@@ -258,7 +263,7 @@ bool Game::colision(SDL_Rect *rec1,SDL_Rect *rec2){
 }
 
 void Game::iniciarConexion(){
-	
+	socket.setTiempoEspera(1);
 	std::cout << "Enviando al servidor: " << serverIp << " : " << port << " datos iniciados" << std::endl;
 	
 	bzero(&infoToSend,sizeof(birdPackage));
@@ -286,4 +291,21 @@ void Game::iniciarConexion(){
 		infoToSend.opcode = JUMP;
 		std::cout << "Partida iniciada, jugador: " << nJugador << std::endl;
 	}
+}
+
+void Game::renderGameOver(){
+	SDL_Rect	game_over;
+	game_over.x = 788;
+	game_over.y = 116;
+	game_over.w = 195;
+	game_over.h = 46;
+	
+	SDL_Rect	rectangulo_destino;
+	rectangulo_destino.x = 332;
+	rectangulo_destino.y = 100;
+	rectangulo_destino.w = 195;
+	rectangulo_destino.h = 46;
+	
+	SDL_RenderCopy(_render, textura, &game_over, &rectangulo_destino);
+	
 }
