@@ -1,4 +1,5 @@
 //					ESCUELA SUPERIOR DE CÓMPUTO
+//			Gonzalez Cruz Edgar
 //			Macías Escalona Jorge Luis
 //			Desarrollo de Sistemas Distribuidos - 4CM1
 //			DESCRIPCIÓN:	estructura para el envío de datos
