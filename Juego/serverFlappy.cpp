@@ -96,21 +96,22 @@ int main(int argc, char *argv[]){
 		}
 		if(infoReceived.opcode == DEAD) //Se informa al servidor de la muerte de un jugador
 		{
-			printf("JUGADOR MUERTO %d...\n",nJugadores);
 			
-			posicionesX[infoReceived.jugadorNum] = -200;
-			posicionesY[infoReceived.jugadorNum] = -200;
 			if(nJugadores>0)
-			nJugadores--;
-			if(nJugadores==0){
+			{
+				printf("JUGADOR MUERTO %d...\n",nJugadores);
+				posicionesX[infoReceived.jugadorNum] = -200;
+				posicionesY[infoReceived.jugadorNum] = -200;
+				nJugadores--;
+			}
+			if(nJugadores<1){
+				
 				tubes = false;
 				for(int i = 0 ; i < 3 ; i++){
 					posicionesX[i] = -100;
 					posicionesY[i] = -100;
 					angulo[i] =330;
 				}
-				
-				
 				for(int j = 0 ; j<TUBE_LIST_SIZE;j++){
 					int altura = rand()%80 + 100;
 					tuberiasY[j] = altura;

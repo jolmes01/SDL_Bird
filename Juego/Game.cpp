@@ -115,18 +115,19 @@ void Game::update(){
 	//se pinta actualiza el render
 	SDL_RenderClear(_render);
 	renderFondo();
-	if(infoReceived.opcode!=GAME_OVER){
-	renderTuberias(&infoReceived);
-	//int i = 0;
-	//Actualiza la posicion de los pajaros
-	for (int i = 0; i < 3; ++i)	{
-		rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
-		rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
-		angulos[i] = infoReceived.angulo[i];
-	}
+	if(infoReceived.opcode ==GAME_OVER || infoReceived.opcode==VIEW){
+		renderGameOver();
 	}
 	else{
-		renderGameOver();
+		renderTuberias(&infoReceived);
+		//int i = 0;
+		//Actualiza la posicion de los pajaros
+		for (int i = 0; i < 3; ++i)	{
+			rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
+			rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
+			angulos[i] = infoReceived.angulo[i];
+		}
+		
 	}
 	
 }
