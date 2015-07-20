@@ -114,8 +114,8 @@ void Game::update(){
 	memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
 	//se pinta actualiza el render
 	SDL_RenderClear(_render);
-	renderFondo();
-	if(infoReceived.opcode ==GAME_OVER || infoReceived.opcode==VIEW){
+	 renderFondo();
+	if(infoReceived.opcode==GAME_OVER||infoReceived.opcode==VIEW){
 		renderGameOver();
 	}
 	else{
