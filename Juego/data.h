@@ -1,5 +1,4 @@
 //					ESCUELA SUPERIOR DE CÓMPUTO
-//			Gonzalez Cruz Edgar
 //			Macías Escalona Jorge Luis
 //			Desarrollo de Sistemas Distribuidos - 4CM1
 //			DESCRIPCIÓN:	estructura para el envío de datos
@@ -8,8 +7,6 @@
 //
 #ifndef DATA_H_
 #define DATA_H_
-/* Definiciones necesarias para los clientes y el servidor de archivos */
-#define BUF_SIZE 1024 //Cantidad de bytes que se transfieren por paquete
 
 /* Definición de códigos de aviso */
 #define JUMP  	1 //Salto de un pájaro
