@@ -18,6 +18,8 @@ int main(int argc, char *argv[]){
 	int posicionesX[3] = {0,0,0};
 	int posicionesY[3] = {0,0,0};
 	double angulo[3] = {330,330,330};
+	int tuberiasX[TUBE_LIST_SIZE];
+	int tuberiasY[TUBE_LIST_SIZE];
 	int nJugadores = 0;
 	int *nPaquetes;
 	if(argc != 2)
@@ -25,7 +27,13 @@ int main(int argc, char *argv[]){
 		cout << "Forma de uso: " << argv[0] << " puerto\n";
 		exit(0);
 	}
-
+	
+	for(int j = 0 ; j<TUBE_LIST_SIZE;j++){
+		int altura = rand()%80 + 100;
+		tuberiasY[j] = altura;
+		tuberiasX[j] = (int) 864/4 * (j+1);
+	}
+	
 	SocketDatagrama socketlocal(atoi(argv[1]));
 
 	while(1)
@@ -71,12 +79,17 @@ int main(int argc, char *argv[]){
 				//cout << "X: " << posicionesX[infoReceived.jugadorNum] << "Y: " << posicionesY[infoReceived.jugadorNum] << "\n";
 			}
 		}
-		int i = 0;
+		//int i = 0;
 		for (int i = 0; i < 3; ++i) //Se actualizan las posiciones de los saltos alojados en el servidor, pero ahora en la estructura global
 		{
 			infoReceived.posicionJUMP_X[i] = posicionesX[i];
 			infoReceived.posicionJUMP_Y[i] = posicionesY[i];
 			infoReceived.angulo[i] = angulo[i];
+		}
+		for(int j =0; j<TUBE_LIST_SIZE; j++){
+			infoReceived.posicionTUBES_X[j] = tuberiasX[j]-=5;
+			infoReceived.posicionTUBES_Y[j] = tuberiasY[j];
+			//cout << "Tuberia X: " << tuberiasX[j] << " Tuberia Y: " << tuberiasY[j] << "\n";
 		}
 		infoReceived.jugadoresTotales = nJugadores; //Se informa de igual forma de los jugadores totales existentes
 		//Se empaqueta la estructura y se envía a la IP que solicito el cambio

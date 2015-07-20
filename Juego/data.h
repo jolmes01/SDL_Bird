@@ -7,6 +7,8 @@
 //
 #ifndef DATA_H_
 #define DATA_H_
+/* Definiciones necesarias para los clientes y el servidor de archivos */
+#define BUF_SIZE 1024 //Cantidad de bytes que se transfieren por paquete
 
 /* Definición de códigos de aviso */
 #define JUMP  	1 //Salto de un pájaro
@@ -14,8 +16,7 @@
 #define NEW		3 //Jugador Nuevo en la partida
 #define ALLOW	4 //Jugador permitido en la partida
 #define DENY	5 //Jugador rechazado en la partida
-#define CLOSE	6 //El jugador salio de la partida
-
+#define TUBE_LIST_SIZE 500 //CANTIDAD DE TUBERIAS
 /* Formato del mensaje que viaja con los datos del movimiento del jugador */
 struct birdPackage{
 	int opcode; //Código del aviso JUMP o DEAD
@@ -24,6 +25,8 @@ struct birdPackage{
 	int posicionJUMP_X[3]; //Número representativo del salto del jugador en el eje X
 	int posicionJUMP_Y[3]; //Número representativo del salto del jugador en el eje Y
 	double angulo[3]; //Número representativo del angulo del jugador en el eje Y
+	int posicionTUBES_X[TUBE_LIST_SIZE];
+	int posicionTUBES_Y[TUBE_LIST_SIZE];
 	/* INSERTAR MÄS DATOS QUE REQUIERAN SER MANDADOS MEDIANTE birdPackage */
 	/**********************************************************************/
 };
