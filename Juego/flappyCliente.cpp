@@ -8,10 +8,13 @@ int posX, posY, nJugador = 0;
 SDL_Rect rectangulo_origen[3]; //Variables para los pajaros en el atlas.bmp
 SDL_Rect rectangulo_destino[3]; //Variables para la posicion en pantalla de los pajaros
 double angulos[3]; //Variables de los angulos para cada jugador
+int punt[3]={0,0,0};//Variable que contiene la informacion de los jugadores
+int punt1=0;
 
 /* Global functions */
 void renderFondo(SDL_Renderer *, SDL_Texture *);
 void initPajarosOrigen(SDL_Renderer *, SDL_Texture *);
+void renderPunt(SDL_Renderer *, SDL_Texture *,int*);
 
 int main(int argc, char **argv)
 {
@@ -71,6 +74,7 @@ int main(int argc, char **argv)
 	}
 	SDL_RenderClear(render);
 	renderFondo(render, textura);
+	renderPunt(render, textura,punt);
 
 	//Inicializa la posición de los pajaros dentro de la pantalla, pasandolos del atlas.bmp al recuadro del juego
 	initPajarosOrigen(render, textura);
@@ -101,6 +105,7 @@ int main(int argc, char **argv)
 			if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
 				rectangulo_destino[nJugador].y -= 100;
 				angulo = 300;
+				punt1++;
 				infoToSend.opcode = 1;
 			} else if (event.type == SDL_QUIT) {
 				infoToSend.opcode = CLOSE;
@@ -112,15 +117,17 @@ int main(int argc, char **argv)
 		infoToSend.posicionJUMP_X[nJugador] = rectangulo_destino[nJugador].x;
 		infoToSend.posicionJUMP_Y[nJugador] = rectangulo_destino[nJugador].y;
 		infoToSend.angulo[nJugador] = angulo;
+		infoToSend.puntuacion[nJugador]=punt1;
 		PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
 		socket.envia(paq);
 		//Recibir paquete con las coordenadas actualizadas
 		PaqueteDatagrama receive(sizeof(birdPackage));
-    	socket.recibe(receive);
-    	memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
+	    	socket.recibe(receive);
+	    	memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
 		//se pinta actualiza el render
 		SDL_RenderClear(render);
 		renderFondo(render, textura);
+		renderPunt(render, textura,punt);
 
 		int i = 0;
 		//Actualiza la posicion de los pajaros
@@ -129,7 +136,7 @@ int main(int argc, char **argv)
 			rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
 			rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
 			angulos[i] = infoReceived.angulo[i];
-
+			punt[i]=infoReceived.puntuacion[i];
 		}
 		for (i = 0; i < infoReceived.jugadoresTotales; ++i)
 		{
@@ -176,6 +183,36 @@ void renderFondo(SDL_Renderer * render, SDL_Texture * textura)
 	SDL_RenderCopy(render, textura, &rectangulo_origen, &rectangulo_destino);
 	rectangulo_destino.x += 288;
 	SDL_RenderCopy(render, textura, &rectangulo_origen, &rectangulo_destino);
+}
+
+//Se encarga de cambiar los marcadores de cada pajarito
+void renderPunt(SDL_Renderer * render, SDL_Texture * textura,int punta[3])
+{
+SDL_Rect rectangulo_origen_n[10]; //Variables para los numeros en el atlas.bmp
+SDL_Rect rectangulo_destino_n[10]; //Variables para la posicion en pantalla de los numeros
+
+	int xPos[] = {992,272,584,612,640,668,584,612,640,668};
+	int yPos[] = {120,910,320,320,320,320,368,368,368,368};
+	int w = 28, h = 38, i = 0, n=0;
+	int pointa=0;
+	for(int y=0;y<3;y++)
+	{
+		for(int z=100,n=0;z>=1;z/=10,n++)
+		{
+			pointa=punta[y]/z;
+			punta[y]=punta[y]-(pointa*z);
+			i=pointa;
+			rectangulo_origen_n[i].x = xPos[i];
+			rectangulo_origen_n[i].y = yPos[i];
+			rectangulo_origen_n[i].w = w;
+			rectangulo_origen_n[i].h = h;
+			rectangulo_destino_n[i].x = (100 * (n+1))+(y*100);
+			rectangulo_destino_n[i].y = 10;
+			rectangulo_destino_n[i].w = w;
+			rectangulo_destino_n[i].h = h;
+			SDL_RenderCopy(render, textura, &rectangulo_origen_n[i], &rectangulo_destino_n[i]);
+		}
+	}
 }
 
 void initPajarosOrigen(SDL_Renderer * render, SDL_Texture * textura)

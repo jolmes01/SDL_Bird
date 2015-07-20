@@ -11,8 +11,6 @@
 #include <iostream>
 #include <cmath>
 
-/* Global functions */
-
 Game::Game(int argc, char **argv){
 	if (argc != 3) {
 		std::cout << "USO flappy <serverIp> <port>" << std::endl;
@@ -63,6 +61,7 @@ void Game::init(const char* titulo, int xpos, int ypos, int ancho, int alto){
 	
 	SDL_RenderClear(_render);
 	renderFondo();
+	renderPunt(punt);
 	
 	//Inicializa la posición de los pajaros dentro de la pantalla, pasandolos del atlas.bmp al recuadro del juego
 	initPajarosOrigen();
@@ -91,6 +90,17 @@ void Game::update(){
 	if (rectangulo_destino[nJugador].y < 500) {
 		rectangulo_destino[nJugador].y += 10;
 	}
+	if (rectangulo_destino[nJugador].y >= 500) {
+		//rectangulo_destino[nJugador].y += 10;
+		infoToSend.opcode=DEAD;
+		infoToSend.posicionJUMP_X[nJugador] = -200;
+		infoToSend.posicionJUMP_Y[nJugador] = -200;
+		alive=0;
+	}
+	//validacion del techo
+	if (rectangulo_destino[nJugador].y < 15) {
+		rectangulo_destino[nJugador].y += 25;
+	}
 	//validacion del angulo maximo
 	if (angulo < 450) {
 		angulo += 15;
@@ -101,6 +111,7 @@ void Game::update(){
 	{
 		infoToSend.posicionJUMP_X[nJugador] = rectangulo_destino[nJugador].x;
 		infoToSend.posicionJUMP_Y[nJugador] = rectangulo_destino[nJugador].y;
+		infoToSend.puntuacion[nJugador]=punt1;
 	}
 	infoToSend.angulo[nJugador] = angulo;
 	PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
@@ -113,14 +124,15 @@ void Game::update(){
 	SDL_RenderClear(_render);
 	renderFondo();
 	renderTuberias(&infoReceived);
+	renderPunt(punt);
 	//int i = 0;
 	//Actualiza la posicion de los pajaros
 	for (int i = 0; i < 3; ++i)	{
 		rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
 		rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
 		angulos[i] = infoReceived.angulo[i];
+		punt[i]=infoReceived.puntuacion[i];
 	}
-	
 }
 
 void Game::render(){
@@ -164,6 +176,35 @@ void Game::renderFondo()
 	SDL_RenderCopy(_render, textura, &rectangulo_origen, &rectangulo_destino);
 }
 
+//Se encarga de cambiar los marcadores de cada pajarito
+void Game::renderPunt(int punta[3])
+{
+SDL_Rect rectangulo_origen_n[10]; //Variables para los numeros en el atlas.bmp
+SDL_Rect rectangulo_destino_n[10]; //Variables para la posicion en pantalla de los numeros
+	int xPos[] = {992,272,584,612,640,668,584,612,640,668};
+	int yPos[] = {120,910,320,320,320,320,368,368,368,368};
+	int w = 28, h = 38, i = 0, n=0;
+	int pointa=0;
+	for(int y=0;y<3;y++)
+	{
+		for(int z=100,n=0;z>=1;z/=10,n++)
+		{
+			pointa=punta[y]/z;
+			punta[y]=punta[y]-(pointa*z);
+			i=pointa;
+			rectangulo_origen_n[i].x = xPos[i];
+			rectangulo_origen_n[i].y = yPos[i];
+			rectangulo_origen_n[i].w = w;
+			rectangulo_origen_n[i].h = h;
+			rectangulo_destino_n[i].x = (28 * (n+1))+(y*100);
+			rectangulo_destino_n[i].y = 10;
+			rectangulo_destino_n[i].w = w;
+			rectangulo_destino_n[i].h = h;
+			SDL_RenderCopy(_render, textura, &rectangulo_origen_n[i], &rectangulo_destino_n[i]);
+		}
+	}
+}
+
 void Game::initPajarosOrigen()
 {
 	int xPos[] = {5,175,228};
@@ -187,6 +228,7 @@ void Game::initPajarosOrigen()
 }
 
 void Game::renderTuberias(struct birdPackage *p){
+	bool t1,t2,firstflag=1;
 	//cout <<"Tuberia";
 	SDL_Rect tuberia;
 	tuberia.x = 110;
@@ -210,23 +252,34 @@ void Game::renderTuberias(struct birdPackage *p){
 		pantalla.x = p->posicionTUBES_X[i];
 		pantalla.y = p->posicionTUBES_Y[i] -250 ;
 		SDL_RenderCopy(_render, textura, &tuberia, &pantalla);
-		if(colision(&pantalla, &rectangulo_destino[nJugador])){
+		t1=colision(&pantalla, &rectangulo_destino[nJugador]);
+		if(t1){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
 			infoToSend.posicionJUMP_X[nJugador] = -200;
 			infoToSend.posicionJUMP_Y[nJugador] = -200;
+			alive=0;
+			return;
 		}
 		pantalla.y = p->posicionTUBES_Y[i] + 200;
 		
 		SDL_RenderCopy(_render, textura, &tuberia2, &pantalla);
-		if(colision(&pantalla, &rectangulo_destino[nJugador])){
+		t2=colision(&pantalla, &rectangulo_destino[nJugador]);
+		if(t2){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
 			infoToSend.posicionJUMP_X[nJugador] = -200;
 			infoToSend.posicionJUMP_Y[nJugador] = -200;
+			alive=0;
+			return;
+		}
+
+		if(alive && firstflag && (pantalla.x +35 <=rectangulo_destino[nJugador].x))
+		{
+			punt1++;
+			firstflag=0;
 		}
 	}
-	
 }
 
 bool Game::colision(SDL_Rect *rec1,SDL_Rect *rec2){
@@ -275,6 +328,17 @@ void Game::iniciarConexion(){
 		std::cout << "Partida llena intente más tarde..." << std::endl;
 		exit(-1);
 	}else{
+		do{
+			infoToSend.opcode = WAIT;
+			PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
+			socket.envia(paq);
+	
+			PaqueteDatagrama receive(sizeof(birdPackage));
+			socket.recibe(receive);
+	
+			memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
+
+		}while(infoReceived.opcode == WAIT);
 		nJugador = infoReceived.jugadorNum;
 		infoToSend.opcode = JUMP;
 		std::cout << "Partida iniciada, jugador: " << nJugador << std::endl;
