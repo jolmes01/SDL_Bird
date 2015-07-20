@@ -30,9 +30,8 @@ public:
 	void iniciarConexion();
 	void renderTuberias(struct birdPackage *);
 	bool colision(SDL_Rect *,SDL_Rect *);
-	void renderPunt(int *);
 private:
-	bool m_bRunning,alive=1;
+	bool m_bRunning;
 	SDL_Window* ventana;
 	SDL_Renderer* _render;
 	SDL_Texture* textura;
@@ -47,7 +46,5 @@ private:
 	int	port;
 	char serverIp  [16];
 	SocketDatagrama	socket;
-	int punt[3]={0,0,0};//Variable que contiene la informacion de los jugadores
-	int punt1=0;
 };
 #endif
