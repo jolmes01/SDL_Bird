@@ -3,7 +3,7 @@
 	Implementación de la clase Game. 
 	En este archivo se incluye toda la lógica de nuestro programa. 
 */
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #include "Game.h"
 #include "data.h"
 #include "SocketDatagrama.h"
@@ -44,11 +44,11 @@ void Game::init(const char* titulo, int xpos, int ypos, int ancho, int alto){
 	/*if (ventana == nullptr){
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
-	}
-	if (_render == nullptr){
+	 }
+	 if (_render == nullptr){
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
-	}*/
+	 }*/
 	//se carga la imagen que contiene todos los graficos
 	bmp = SDL_LoadBMP("atlas.bmp");
 	//bmp = SDL_LoadBMP("/Volumes/Macintosh HD/Users/emyrkr/Desktop/atlas.bmp");
@@ -73,7 +73,7 @@ void Game::handleEvents(){
 	while(SDL_PollEvent(&event))
 	{
 		//salto
-		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
+		if (infoToSend.opcode!=DEAD && infoToSend.opcode!=VIEW && event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
 			rectangulo_destino[nJugador].y -= 100;
 			angulo = 300;
 			infoToSend.opcode = 1;
@@ -101,6 +101,9 @@ void Game::update(){
 	{
 		infoToSend.posicionJUMP_X[nJugador] = rectangulo_destino[nJugador].x;
 		infoToSend.posicionJUMP_Y[nJugador] = rectangulo_destino[nJugador].y;
+	}
+	if(infoReceived.opcode==DEAD){
+		infoToSend.opcode = VIEW;
 	}
 	infoToSend.angulo[nJugador] = angulo;
 	PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
@@ -213,8 +216,8 @@ void Game::renderTuberias(struct birdPackage *p){
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
-			infoToSend.posicionJUMP_X[nJugador] = -200;
-			infoToSend.posicionJUMP_Y[nJugador] = -200;
+			//infoToSend.posicionJUMP_X[nJugador] = -200;
+			//infoToSend.posicionJUMP_Y[nJugador] = -200;
 		}
 		pantalla.y = p->posicionTUBES_Y[i] + 200;
 		
@@ -222,14 +225,18 @@ void Game::renderTuberias(struct birdPackage *p){
 		if(colision(&pantalla, &rectangulo_destino[nJugador])){
 			//cout <<"Dead\n";
 			infoToSend.opcode=DEAD;
-			infoToSend.posicionJUMP_X[nJugador] = -200;
-			infoToSend.posicionJUMP_Y[nJugador] = -200;
+			//infoToSend.posicionJUMP_X[nJugador] = -200;
+			//infoToSend.posicionJUMP_Y[nJugador] = -200;
 		}
 	}
 	
 }
 
 bool Game::colision(SDL_Rect *rec1,SDL_Rect *rec2){
+	if(infoReceived.opcode==VIEW){
+		return false;
+	}
+	
 	int w1,h1,w2,h2,x1,y1,x2,y2;
 	
 	w1=rec1->w;

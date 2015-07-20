@@ -29,7 +29,7 @@ int SocketDatagrama::recibe(PaqueteDatagrama & p)
 {
     unsigned int addr_len = sizeof(direccionForanea);
     bzero((char *)&direccionForanea, sizeof(direccionForanea));
-    int regreso = recvfrom(s,p.obtieneDatos(),p.obtieneLongitud(), 0, (struct sockaddr *) &direccionForanea, &addr_len);
+    int regreso = (int)recvfrom(s,p.obtieneDatos(),p.obtieneLongitud(), 0, (struct sockaddr *) &direccionForanea, &addr_len);
     
     p.inicializaPuerto(ntohs(direccionForanea.sin_port));
     p.inicializaIp(inet_ntoa(direccionForanea.sin_addr));
@@ -45,7 +45,7 @@ int SocketDatagrama::envia(PaqueteDatagrama & p)
     direccionForanea.sin_addr.s_addr = inet_addr(p.obtieneDireccion());
     direccionForanea.sin_port = htons(p.obtienePuerto());
     
-    return sendto(s,p.obtieneDatos(), p.obtieneLongitud(), 0, (struct sockaddr *) &direccionForanea, sizeof(direccionForanea));
+    return (int)sendto(s,p.obtieneDatos(), p.obtieneLongitud(), 0, (struct sockaddr *) &direccionForanea, sizeof(direccionForanea));
 }
 
 void SocketDatagrama::activaBroadcast(bool opcion)

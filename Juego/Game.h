@@ -1,13 +1,13 @@
 // 	Game.h
 /*
-	Estructura de la clase Game.
+	Estructura de la clase Game. 
 	Clase que nos permite crear y manejar los gráficos de nuestro programa.
- */
+*/
 
 #ifndef __Game__
 #define __Game__
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #include <iostream>
 #include <cmath>
 #include "data.h"

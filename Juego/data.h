@@ -17,6 +17,8 @@
 #define ALLOW	4 //Jugador permitido en la partida
 #define DENY	5 //Jugador rechazado en la partida
 #define CLOSE	6 //Jugador rechazado en la partida
+#define WAIT	7 //En espera de que el servidor le avise de la partida completa
+#define VIEW	8 //Queda viendo
 #define TUBE_LIST_SIZE 500 //CANTIDAD DE TUBERIAS
 /* Formato del mensaje que viaja con los datos del movimiento del jugador */
 struct birdPackage{
@@ -28,7 +30,7 @@ struct birdPackage{
 	double angulo[3]; //Número representativo del angulo del jugador en el eje Y
 	int posicionTUBES_X[TUBE_LIST_SIZE];
 	int posicionTUBES_Y[TUBE_LIST_SIZE];
+	int puntuacion[3];//Array que contiene las puntuaciones de los jugadores
 	/* INSERTAR MÄS DATOS QUE REQUIERAN SER MANDADOS MEDIANTE birdPackage */
-	/**********************************************************************/
 };
 #endif

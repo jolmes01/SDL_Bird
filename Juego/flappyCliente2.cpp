@@ -1,4 +1,4 @@
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #include "Game.h"
 #include "SocketDatagrama.h"
 #include "PaqueteDatagrama.h"

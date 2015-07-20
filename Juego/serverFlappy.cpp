@@ -20,8 +20,11 @@ int main(int argc, char *argv[]){
 	double angulo[3] = {330,330,330};
 	int tuberiasX[TUBE_LIST_SIZE];
 	int tuberiasY[TUBE_LIST_SIZE];
+	int puntuaciones[3]={0,0,0};
 	int nJugadores = 0;
 	int *nPaquetes;
+	int flaginit=0;
+	bool tubes = false;
 	if(argc != 2)
 	{
 		cout << "Forma de uso: " << argv[0] << " puerto\n";
@@ -31,7 +34,7 @@ int main(int argc, char *argv[]){
 	for(int j = 0 ; j<TUBE_LIST_SIZE;j++){
 		int altura = rand()%80 + 100;
 		tuberiasY[j] = altura;
-		tuberiasX[j] = (int) 864/4 * (j+4);
+		tuberiasX[j] = (int) 864/4 * (j+3);
 	}
 	
 	SocketDatagrama socketlocal(atoi(argv[1]));
@@ -44,21 +47,49 @@ int main(int argc, char *argv[]){
 		socketlocal.recibe(receive);
 		memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
 		/* Se revisan los códigos de operación para la interacción del jugador*/
+
+		/*if(flaginit==1 && nJugadores==0 )
+		{
+			cout<<"Reiniciando servidor"<<"\n";
+			posicionesX[0] = -100;
+			posicionesX[1] = -100;
+			posicionesX[2] = -100;
+			posicionesY[0] = -100;
+			posicionesY[1] = -100;
+			posicionesY[2] = -100;
+			angulo[0] = 330;
+			angulo[1] = 330;
+			angulo[2] = 330;
+			puntuaciones[0] = 0;
+			puntuaciones[1] = 0;
+			puntuaciones[2] = 0;
+			nJugadores = 0;
+			flaginit=0;
+		}*/
+		
 		if(infoReceived.opcode == NEW) //Se quiere integrar un nuevo jugador
 		{
 			if(nJugadores < 3) //Es permitido
 			{
-				infoReceived.opcode = ALLOW;
+				tubes = true;
+				infoReceived.opcode = WAIT;
 				infoReceived.jugadorNum = nJugadores;
 				infoReceived.posicionJUMP_X[nJugadores] = posicionesX[nJugadores];
 				infoReceived.posicionJUMP_Y[nJugadores] = posicionesY[nJugadores];
 				infoReceived.angulo[nJugadores] = angulo[nJugadores];
+				infoReceived.puntuacion[nJugadores] =puntuaciones[nJugadores];
 				cout << "X: " << infoReceived.posicionJUMP_X[nJugadores] << "Y: " << infoReceived.posicionJUMP_Y[nJugadores] << "\n";
 				printf("NUEVO JUGADOR %d\n",nJugadores);
 				nJugadores++;
+				printf("Esperando mas jugadores \n");				
 			}
-			else infoReceived.opcode = DENY;
+			else 
+			{
+				infoReceived.opcode = DENY;
+				printf("Rechazado \n");
+			}
 		}
+
 		if(infoReceived.opcode == CLOSE)
 		{
 			printf("JUGADOR FUERA DE PARTIDA...\n");
@@ -67,40 +98,47 @@ int main(int argc, char *argv[]){
 		if(infoReceived.opcode == DEAD) //Se informa al servidor de la muerte de un jugador
 		{
 			printf("JUGADOR MUERTO...\n");
-			posicionesX[infoReceived.jugadorNum] = -200;
-			posicionesY[infoReceived.jugadorNum] = -200;
+			//posicionesX[infoReceived.jugadorNum] = 0;
+			//posicionesY[infoReceived.jugadorNum] = 0;
+			if(nJugadores>0)
 			nJugadores--;
 		}
 		if(infoReceived.opcode != NEW && infoReceived.opcode != DEAD) //El código puede ser un salto que hizo el jugador
 		{
+			if(tubes)
+				for(int j =0; j<TUBE_LIST_SIZE; j++){
+					infoReceived.posicionTUBES_X[j] = tuberiasX[j]-=3;
+					infoReceived.posicionTUBES_Y[j] = tuberiasY[j];
+					//cout << "Tuberia X: " << tuberiasX[j] << " Tuberia Y: " << tuberiasY[j] << "\n";
+				}
 			if(infoReceived.opcode == JUMP) //Se actualizan las posiciones en el servidor del jugador que se movio
 			{
 				posicionesX[infoReceived.jugadorNum] = infoReceived.posicionJUMP_X[infoReceived.jugadorNum];
 				posicionesY[infoReceived.jugadorNum] = infoReceived.posicionJUMP_Y[infoReceived.jugadorNum];
 				angulo[infoReceived.jugadorNum] = infoReceived.angulo[infoReceived.jugadorNum];
+				puntuaciones[infoReceived.jugadorNum]=infoReceived.puntuacion[infoReceived.jugadorNum];
 				//cout << "X: " << posicionesX[infoReceived.jugadorNum] << "Y: " << posicionesY[infoReceived.jugadorNum] << "\n";
 			}
+			if(infoReceived.opcode == WAIT) //Se actualizan las posiciones en el servidor del jugador que se movio
+			{
+				if(nJugadores == 3) infoReceived.opcode = ALLOW;
+			}
 		}
-		//int i = 0;
-		for (int i = 0; i < 3; ++i) //Se actualizan las posiciones de los saltos alojados en el servidor, pero ahora en la estructura global
-		{
-			infoReceived.posicionJUMP_X[i] = posicionesX[i];
-			infoReceived.posicionJUMP_Y[i] = posicionesY[i];
-			infoReceived.angulo[i] = angulo[i];
-		}
-		for(int j =0; j<TUBE_LIST_SIZE; j++){
-			infoReceived.posicionTUBES_X[j] = tuberiasX[j]-=5;
-			infoReceived.posicionTUBES_Y[j] = tuberiasY[j];
-			//cout << "Tuberia X: " << tuberiasX[j] << " Tuberia Y: " << tuberiasY[j] << "\n";
-		}
-		infoReceived.jugadoresTotales = nJugadores; //Se informa de igual forma de los jugadores totales existentes
-		//Se empaqueta la estructura y se envía a la IP que solicito el cambio
-		PaqueteDatagrama envio((char *)&infoReceived, sizeof(birdPackage),(char*)"",0);
-		envio.inicializaIp(receive.obtieneDireccion());
-		envio.inicializaPuerto(receive.obtienePuerto());
 
-		envio.inicializaDatos((char*)&infoReceived);
-		socketlocal.envia(envio);
+			for (int i = 0; i < 3; ++i) //Se actualizan las posiciones de los saltos alojados en el servidor, pero ahora en la estructura global
+			{
+				infoReceived.posicionJUMP_X[i] = posicionesX[i];
+				infoReceived.posicionJUMP_Y[i] = posicionesY[i];
+				infoReceived.angulo[i] = angulo[i];
+				infoReceived.puntuacion[i] = puntuaciones[i];
+			}
+			infoReceived.jugadoresTotales = nJugadores; //Se informa de igual forma de los jugadores totales existentes
+			//Se empaqueta la estructura y se envía a la IP que solicito el cambio
+			PaqueteDatagrama envio((char *)&infoReceived, sizeof(birdPackage),(char*)"",0);
+			envio.inicializaIp(receive.obtieneDireccion());
+			envio.inicializaPuerto(receive.obtienePuerto());
+			envio.inicializaDatos((char*)&infoReceived);
+			socketlocal.envia(envio);
 	}
 	return 0;
 }
