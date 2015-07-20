@@ -3,13 +3,8 @@
 #include "SocketDatagrama.h"
 #include "PaqueteDatagrama.h"
 
-<<<<<<< HEAD
 const int FPS = 30;
 const float DELAY_TIME = 1000.0f / FPS;
-=======
-const int FPS = 20;
-const int DELAY_TIME = 1000.0f / FPS;
->>>>>>> origin/master
 Game* g_game = 0;
 
 SDL_Point window_position = {//    Posición de la ventana

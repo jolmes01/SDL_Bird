@@ -40,21 +40,18 @@ void Game::init(const char* titulo, int xpos, int ypos, int ancho, int alto){
 		m_bRunning = 0;
 	}
 	ventana = SDL_CreateWindow(titulo, xpos, ypos, ancho, alto, SDL_WINDOW_SHOWN);
-<<<<<<< HEAD
 	if (ventana == nullptr){
-=======
-	_render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
-	/*if (ventana == nullptr){
->>>>>>> origin/master
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
 	}
+	_render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
 	if (_render == nullptr){
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
 	}
 	//se carga la imagen que contiene todos los graficos
 	bmp = SDL_LoadBMP("atlas.bmp");
+	//bmp = SDL_LoadBMP("/Volumes/Macintosh HD/Users/emyrkr/Desktop/atlas.bmp");
 	//se define el blanco como color transparente
 	SDL_SetColorKey(bmp, 1, SDL_MapRGB(bmp->format, 255, 255, 255));
 	textura = SDL_CreateTextureFromSurface(_render, bmp);
