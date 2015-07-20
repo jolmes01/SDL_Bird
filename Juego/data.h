@@ -16,6 +16,7 @@
 #define NEW		3 //Jugador Nuevo en la partida
 #define ALLOW	4 //Jugador permitido en la partida
 #define DENY	5 //Jugador rechazado en la partida
+#define CLOSE	6 //El jugador salio de la partida
 #define TUBE_LIST_SIZE 500 //CANTIDAD DE TUBERIAS
 /* Formato del mensaje que viaja con los datos del movimiento del jugador */
 struct birdPackage{
