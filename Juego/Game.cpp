@@ -7,11 +7,22 @@
 #include "Game.h"
 #include "data.h"
 #include "SocketDatagrama.h"
+#include "PaqueteDatagrama.h"
+#include <iostream>
+#include "SDL.h"	
+#include <cmath>
 
 /* Global functions */
 
-
-Game::Game(){
+Game::Game(int argc, char **argv){
+	if (argc != 3) {
+        std::cout << "USO flappy <serverIp> <port>" << std::endl;
+		exit(-1);
+	}
+	strcpy(serverIp, argv[1]);
+	port = atoi(argv[2]);
+	nJugador = 0;
+	angulo = 330;
 	iniciarConexion();
 }
 
@@ -30,71 +41,95 @@ void Game::init(const char* titulo, int xpos, int ypos, int ancho, int alto){
 		m_bRunning = 0;
 	}
 	ventana = SDL_CreateWindow(titulo, xpos, ypos, ancho, alto, SDL_WINDOW_SHOWN);
-	if (ventana == nullptr){
+	/*if (ventana == nullptr){
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
 	}
-	render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
-	if (m_pRenderer == nullptr){
+	_render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
+	if (_render == nullptr){
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
-	}
+	}*/
 	//se carga la imagen que contiene todos los graficos
 	bmp = SDL_LoadBMP("atlas.bmp");
 	//se define el blanco como color transparente
 	SDL_SetColorKey(bmp, 1, SDL_MapRGB(bmp->format, 255, 255, 255));
-	textura = SDL_CreateTextureFromSurface(render, bmp);
+	textura = SDL_CreateTextureFromSurface(_render, bmp);
 	SDL_FreeSurface(bmp);
 	if (textura == NULL) {
         std::cout << "FAILED TO FIND THE IMAGE" << std::endl;
 		m_bRunning = 0;
 	}
 
-	SDL_RenderClear(render);
+	SDL_RenderClear(_render);
 	renderFondo();
 
 	//Inicializa la posición de los pajaros dentro de la pantalla, pasandolos del atlas.bmp al recuadro del juego
 	initPajarosOrigen();
-	SDL_RenderPresent(render);
+	SDL_RenderPresent(_render);
 }
 
 void Game::handleEvents(){
-	while (SDL_PollEvent(&event)) {
-			//salto
-			if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
-				rectangulo_destino[nJugador].y -= 100;
-				angulo = 300;
-				infoToSend.opcode = 1;
-			} else if (event.type == SDL_QUIT) {
-				infoToSend.opcode = CLOSE;
-				done = 0;
-			}
-		}
-	SDL_Event event;
-	if(SDL_PollEvent(&event))
+	while(SDL_PollEvent(&event))
 	{
-		switch (event.type)
-		{
-			case SDL_QUIT:
+		//salto
+		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) {
+			rectangulo_destino[nJugador].y -= 100;
+			angulo = 300;
+			infoToSend.opcode = 1;
+		} else if (event.type == SDL_QUIT) {
+			infoToSend.opcode = CLOSE;
 			m_bRunning = false;
-			break;
-			default:
-			break;
 		}
 	}
 }
 
 void Game::update(){
+	//validacion del piso
+	if (rectangulo_destino[nJugador].y < 500) {
+		rectangulo_destino[nJugador].y += 10;
+	}
+	//validacion del angulo maximo
+	if (angulo < 450) {
+		angulo += 15;
+	}
+	//enviar Paquete con las coordenadas
+	infoToSend.jugadorNum = nJugador;
+	infoToSend.posicionJUMP_X[nJugador] = rectangulo_destino[nJugador].x;
+	infoToSend.posicionJUMP_Y[nJugador] = rectangulo_destino[nJugador].y;
+	infoToSend.angulo[nJugador] = angulo;
+	PaqueteDatagrama paq((char *)&infoToSend, sizeof(birdPackage), serverIp, port);
+	socket.envia(paq);
+	//Recibir paquete con las coordenadas actualizadas
+	PaqueteDatagrama receive(sizeof(birdPackage));
+	socket.recibe(receive);
+	memcpy(&infoReceived, receive.obtieneDatos(), sizeof(birdPackage));
+	//se pinta actualiza el render
+	SDL_RenderClear(_render);
+	renderFondo();
+
+	int i = 0;
+	//Actualiza la posicion de los pajaros
+	for (int i = 0; i < 3; ++i)	{
+		rectangulo_destino[i].x = infoReceived.posicionJUMP_X[i];
+		rectangulo_destino[i].y = infoReceived.posicionJUMP_Y[i];
+		angulos[i] = infoReceived.angulo[i];
+	}
 }
 
 void Game::render(){
-	
+	for (int i = 0; i < infoReceived.jugadoresTotales; ++i)
+	{
+		//funciona como copy pero rota la imagen con el angulo
+		SDL_RenderCopyEx(_render, textura, &rectangulo_origen[i], &rectangulo_destino[i], infoReceived.angulo[i], NULL, SDL_FLIP_NONE);
+	}
+	SDL_RenderPresent(_render);
 }
 
 void Game::clean(){
 	/* Free all objects */
 	SDL_DestroyTexture(textura);
-	SDL_DestroyRenderer(render);
+	SDL_DestroyRenderer(_render);
 	SDL_DestroyWindow(ventana);
 
 	/* Quit program */
@@ -116,11 +151,11 @@ void Game::renderFondo()
 	rectangulo_destino.w = 288;
 	rectangulo_destino.h = 510;
 
-	SDL_RenderCopy(render, textura, &rectangulo_origen, &rectangulo_destino);
+	SDL_RenderCopy(_render, textura, &rectangulo_origen, &rectangulo_destino);
 	rectangulo_destino.x += 288;
-	SDL_RenderCopy(render, textura, &rectangulo_origen, &rectangulo_destino);
+	SDL_RenderCopy(_render, textura, &rectangulo_origen, &rectangulo_destino);
 	rectangulo_destino.x += 288;
-	SDL_RenderCopy(render, textura, &rectangulo_origen, &rectangulo_destino);
+	SDL_RenderCopy(_render, textura, &rectangulo_origen, &rectangulo_destino);
 }
 
 void Game::initPajarosOrigen()
@@ -141,23 +176,11 @@ void Game::initPajarosOrigen()
 		rectangulo_destino[i].y = 300;
 		rectangulo_destino[i].w = w;
 		rectangulo_destino[i].h = h;
-		SDL_RenderCopy(render, textura, &rectangulo_origen[i], &rectangulo_destino[i]);
+		SDL_RenderCopy(_render, textura, &rectangulo_origen[i], &rectangulo_destino[i]);
 	}
 }
 
 void Game::iniciarConexion(){
-	struct birdPackage infoToSend, infoReceived;
-	int	port;
-	char serverIp  [16];
-	if (argc != 3) {
-        std::cout << "USO flappy <serverIp> <port>" << std::endl;
-		exit(-1);
-	}
-
-	strcpy(serverIp, argv[1]);
-	port = atoi(argv[2]);
-
-	SocketDatagrama	socket;
 
 	std::cout << "Enviando al servidor: " << serverIp << " : " << port << " datos iniciados" << std::endl;
 
@@ -187,4 +210,3 @@ void Game::iniciarConexion(){
 		std::cout << "Partida iniciada, jugador: " << nJugador << std::endl;
 	}
 }
-
