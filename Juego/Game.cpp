@@ -41,11 +41,11 @@ void Game::init(const char* titulo, int xpos, int ypos, int ancho, int alto){
 		m_bRunning = 0;
 	}
 	ventana = SDL_CreateWindow(titulo, xpos, ypos, ancho, alto, SDL_WINDOW_SHOWN);
+	_render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
 	/*if (ventana == nullptr){
 		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
 	}
-	_render = SDL_CreateRenderer(ventana, -1, SDL_RENDERER_ACCELERATED);
 	if (_render == nullptr){
 		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		m_bRunning = 0;
